@@ -27,11 +27,15 @@ var functions = {
 }
 
 function aggsy (agg, data) {
-  var result = {}
-
   var funcText = genFunction(agg)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
+
+  if (!data) {
+    return func
+  }
+
+  var result = {}
 
   for (var i = 0; i < data.length; i++) {
     func(result, data[i])

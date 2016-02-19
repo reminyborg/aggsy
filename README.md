@@ -18,7 +18,7 @@ $ npm install aggsy
 
 ```javascript
 var aggsy = require('aggsy')
-aggsy(aggsyQuery, arrayOfObjects)
+aggsy(query, array)
 ```
 
 ### Example
@@ -39,6 +39,26 @@ aggsy('model(_sum(km)_count())', cars)
   volvo: { '_count()': 1, '_sum(km)': 100 }
 }
 */
+```
+
+### Advanced use
+
+If you call aggsy with only the query parameter it returns an aggregate function.
+This can be used in flexible ways.
+
+The aggregate function takes a mutable object and one item as parameters
+
+```javascript
+var aggregate = aggsy(query)
+
+var result = {}
+
+array.forEach(function (item) {
+  aggregate(result, item)
+})
+
+// result will be the aggregated result
+
 ```
 
 License
