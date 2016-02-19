@@ -1,5 +1,4 @@
 var balanced = require('balanced-match')
-var lodash = require('lodash')
 var debug = require('debug')('aggsy.function')
 
 var functions = {
