@@ -3,19 +3,24 @@ var debug = require('debug')('aggsy.function')
 
 var functions = {
   '_sum': function (parentPath, params) {
-    var path = parentPath + '[\'_sum(' + params + ')\']'
+    var name = '_sum(' + params + ')'
+    var path = parentPath + '[\'' + name + '\']'
     var value = 'item[\'' + params + '\']'
 
-    var func = 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = ' + value + '; }\n'
-    func += 'else { ' + path + ' += ' + value + '};\n'
+    var func = '// ' + '_sum(' + params + ')\n'
+    func += 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = ' + value + '; }\n'
+    func += 'else { ' + path + ' += ' + value + '; }\n'
 
     return func
   },
 
   '_count': function (parentPath) {
-    var path = parentPath + '[\'_count()\']'
-    var func = 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = 1; }\n'
-    func += 'else { ' + path + '++ };\n'
+    var name = '_count()'
+    var path = parentPath + '[\'' + name + '\']'
+
+    var func = '// ' + name + '\n'
+    func += 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = 1; }\n'
+    func += 'else { ' + path + '++; }\n'
 
     return func
   }
@@ -35,8 +40,8 @@ function aggsy (agg, data) {
   return result
 }
 
-function genFunction (agg, func, path) {
-  func = func || ''
+function genFunction (agg, path) {
+  var func = ''
   path = path || 'result'
 
   var parsed = balanced('(', ')', agg)
@@ -46,9 +51,10 @@ function genFunction (agg, func, path) {
   if (functions[pre]) {
     func += functions[pre](path, parsed.body)
     if (parsed.post) {
-      func += genFunction(parsed.post, func, path)
+      func += genFunction(parsed.post, path)
     }
   } else {
+    func += '// ' + pre + '\n'
     path += '[item[\'' + pre + '\']]'
 
     if (!parsed.body) {
@@ -56,7 +62,7 @@ function genFunction (agg, func, path) {
       func += path + '.push(item);\n'
     } else {
       func += 'if (!' + path + ') { ' + path + ' = {} };\n'
-      func += genFunction(parsed.body, func, path)
+      func += genFunction(parsed.body, path)
     }
   }
 

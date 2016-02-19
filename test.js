@@ -13,7 +13,7 @@ var cars = [
 ]
 
 var simpleGrouping = { tesla: [ { km: 250, make: 's', model: 'tesla' }, { km: 120, make: 's', model: 'tesla' }, { km: 10, make: 's', model: 'tesla' }, { km: 20, make: 'x', model: 'tesla' } ], volvo: [ { km: 100, make: 'v50', model: 'volvo' }, { km: 120, make: 'v50', model: 'volvo' }, { km: 200, make: 'v60', model: 'volvo' } ], vw: [ { km: 100, make: 'touran', model: 'vw' } ] }
-var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 800 }, volvo: { '_count()': 3, '_sum(km)': 840 }, vw: { '_count()': 1, '_sum(km)': 200 } }
+var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
 
 test('#aggsy', function (t) {
   t.plan(2)
