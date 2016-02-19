@@ -4,6 +4,8 @@
 
 Aggsy is a aggregation language for easy use in http query strings
 
+[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 ### Installation
 
 You need npm installed:

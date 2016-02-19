@@ -4,7 +4,7 @@
   "description": "Aggregation language for easy use in http query strings",
   "main": "index.js",
   "scripts": {
-    "test": "test.js"
+    "test": "standard && node test.js"
   },
   "keywords": [
     "aggregation",
@@ -16,6 +16,7 @@
   "author": "Remi Nyborg <remi@nyborg.priv.no> (http://reminyborg.com)",
   "license": "MIT",
   "devDependencies": {
+    "standard": "^6.0.6",
     "tape": "^4.4.0"
   },
   "dependencies": {
