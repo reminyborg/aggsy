@@ -32,7 +32,7 @@ var cars = [
   { model: 'tesla', make: 's', km: 120 }
 ]
 
-aggsy('model(_sum(km)_count())', cars)
+aggsy('model(_sum(km),_count())', cars)
 
 /* Gives: {
   tesla: { '_count()': 2, '_sum(km)': 320 },
@@ -60,6 +60,10 @@ array.forEach(function (item) {
 // result will be the aggregated result
 
 ```
+
+### Query language
+
+**language description to come**
 
 License
 ----
