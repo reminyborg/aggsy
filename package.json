@@ -1,0 +1,29 @@
+{
+  "name": "aggsy",
+  "version": "0.0.0",
+  "description": "Aggregation language for easy use in http query strings",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "keywords": [
+    "aggregation",
+    "language",
+    "query",
+    "string",
+    "http"
+  ],
+  "author": "Remi Nyborg <remi@nyborg.priv.no> (http://reminyborg.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^4.4.0"
+  },
+  "dependencies": {
+    "balanced-match": "^0.3.0",
+    "debug": "^2.2.0",
+    "lodash": "^4.5.0",
+    "lodash.get": "^4.1.2",
+    "lodash.set": "^4.0.0",
+    "nest-by": "^1.0.0"
+  }
+}
