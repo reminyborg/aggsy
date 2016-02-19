@@ -16,7 +16,8 @@ var simpleGrouping = { tesla: [ { km: 250, make: 's', model: 'tesla' }, { km: 12
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
 
 test('#aggsy', function (t) {
-  t.plan(2)
+  t.plan(3)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
+  t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
 })

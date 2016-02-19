@@ -1,6 +1,8 @@
 var balanced = require('balanced-match')
 var debug = require('debug')('aggsy.function')
 
+var leading = /(^[\s*,]+)/
+
 var functions = {
   '_sum': function (parentPath, params) {
     var name = '_sum(' + params + ')'
@@ -50,7 +52,7 @@ function genFunction (agg, path) {
 
   var parsed = balanced('(', ')', agg)
 
-  var pre = parsed.pre
+  var pre = parsed.pre.replace(leading, '')
 
   if (functions[pre]) {
     func += functions[pre](path, parsed.body)
