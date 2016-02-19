@@ -10,8 +10,8 @@ var functions = {
     var value = 'item[\'' + params + '\']'
 
     var func = '// ' + '_sum(' + params + ')\n'
-    func += 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = ' + value + '; }\n'
-    func += 'else { ' + path + ' += ' + value + '; }\n'
+    func += 'if (typeof ' + path + ' === \'undefined\') { ' + path + ' = ' + value + '; }\n'
+    func += 'else { ' + path + ' += ' + value + '; }\n\n'
 
     return func
   },
@@ -21,14 +21,15 @@ var functions = {
     var path = parentPath + '[\'' + name + '\']'
 
     var func = '// ' + name + '\n'
-    func += 'if (typeof ' + path + ' == \'undefined\') { ' + path + ' = 1; }\n'
-    func += 'else { ' + path + '++; }\n'
+    func += 'if (typeof ' + path + ' === \'undefined\') { ' + path + ' = 1; }\n'
+    func += 'else { ' + path + '++; }\n\n'
 
     return func
   }
 }
 
 function aggsy (agg, data) {
+  debug(agg)
   var funcText = genFunction(agg)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
@@ -47,7 +48,7 @@ function aggsy (agg, data) {
 }
 
 function genFunction (agg, path) {
-  var func = ''
+  var func = '\n'
   path = path || 'result'
 
   var parsed = balanced('(', ')', agg)
@@ -64,10 +65,10 @@ function genFunction (agg, path) {
     path += '[item[\'' + pre + '\']]'
 
     if (!parsed.body) {
-      func += 'if (!' + path + ') { ' + path + ' = [] };\n'
-      func += path + '.push(item);\n'
+      func += 'if (!' + path + ') { ' + path + ' = []; }\n'
+      func += path + '.push(item);\n\n'
     } else {
-      func += 'if (!' + path + ') { ' + path + ' = {} };\n'
+      func += 'if (!' + path + ') { ' + path + ' = {}; }\n\n'
       func += genFunction(parsed.body, path)
     }
   }
