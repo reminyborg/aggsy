@@ -2,17 +2,17 @@ var test = require('tape')
 var aggsy = require('./index')
 
 var cars = [
-  { model: 'volvo', detail: { make: 'v50' }, km: 100 },
+  { model: 'volvo', detail: { make: 'v50' }, km: 100 },
   { model: 'volvo', detail: { make: 'v50' }, km: 120 },
   { model: 'volvo', detail: { make: 'v60' }, km: 200 },
   { model: 'tesla', detail: { make: 's' }, km: 250 },
   { model: 'tesla', detail: { make: 's' }, km: 120 },
   { model: 'tesla', detail: { make: 's' }, km: 10 },
-  { model: 'tesla', detail: { make: 'x' }, km: 20 },
+  { model: 'tesla', detail: { make: 'x' }, km: 20 },
   { model: 'vw', detail: { make: 'touran' }, km: 100 }
 ]
 
-var simpleGrouping = { tesla: [ { detail: { make: 's' }, km: 250, model: 'tesla' }, { detail: { make: 's' }, km: 120, model: 'tesla' }, { detail: { make: 's' }, km: 10, model: 'tesla' }, { detail: { make: 'x' }, km: 20, model: 'tesla' } ], volvo: [ { detail: { make: 'v50' }, km: 100, model: 'volvo' }, { detail: { make: 'v50' }, km: 120, model: 'volvo' }, { detail: { make: 'v60' }, km: 200, model: 'volvo' } ], vw: [ { detail: { make: 'touran' }, km: 100, model: 'vw' } ] } 
+var simpleGrouping = { tesla: [ { detail: { make: 's' }, km: 250, model: 'tesla' }, { detail: { make: 's' }, km: 120, model: 'tesla' }, { detail: { make: 's' }, km: 10, model: 'tesla' }, { detail: { make: 'x' }, km: 20, model: 'tesla' } ], volvo: [ { detail: { make: 'v50' }, km: 100, model: 'volvo' }, { detail: { make: 'v50' }, km: 120, model: 'volvo' }, { detail: { make: 'v60' }, km: 200, model: 'volvo' } ], vw: [ { detail: { make: 'touran' }, km: 100, model: 'vw' } ] }
 
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
 

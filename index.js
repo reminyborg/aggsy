@@ -47,8 +47,8 @@ function aggsy (agg, data) {
   return result
 }
 
-function propPath (path) { 
-  return '["' + path.split(".").join('"]["') + '"]' 
+function propPath (path) {
+  return '["' + path.split('.').join('"]["') + '"]'
 }
 
 function genFunction (agg, path) {
