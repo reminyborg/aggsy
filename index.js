@@ -8,11 +8,13 @@ var reducers = require('./reducers')
 
 function aggsy (agg, data) {
   debug(agg)
-  var funcText = '\n'
+  var funcText = '\n// reducers\n'
 
   for (var name in reducers) {
     if (typeof reducers[name] !== 'function') { throw new Error('reducers must be functions') }
-    funcText += reducers[name].toString() + '\n'
+    if (agg.indexOf(name) !== -1) {
+      funcText += reducers[name].toString() + '\n'
+    }
   }
 
   funcText += genFunction(agg)
