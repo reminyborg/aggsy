@@ -20,13 +20,16 @@ var dotNotationGrouping = { s: [ { detail: { make: 's' }, km: 250, model: 'tesla
 
 var dotNotationAggs = { s: { '_count()': 3, '_sum(km)': 380 }, touran: { '_count()': 1, '_sum(km)': 100 }, v50: { '_count()': 2, '_sum(km)': 220 }, v60: { '_count()': 1, '_sum(km)': 200 }, x: { '_count()': 1, '_sum(km)': 20 } }
 
+var namedReducers = { tesla: { distance: 400, reports: 4 }, volvo: { distance: 420, reports: 3 }, vw: { distance: 100, reports: 1 } }
+
 test('#aggsy', function (t) {
-  t.plan(5)
+  t.plan(6)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
   t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
   t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
+  t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
 })
 
 test('#reducers', function (t) {

@@ -1,7 +1,8 @@
 var balanced = require('balanced-match')
 var debug = require('debug')('aggsy.function')
 
-var leading = /(^[\s*,]+)/
+var leading = /^[\s,]+/
+var findName = /^[\w.]+(?=:)/
 
 var reducers = require('./reducers')
 
@@ -43,12 +44,18 @@ function genFunction (agg, path) {
 
   var pre = parsed.pre.replace(leading, '')
 
-  /* var name = '_sum(' + params + ')'
-  var path = parentPath + '["' + name + '"]'
-  var value = 'item' + propPath(params) */
+  // if named function store and remove name
+  var name = findName.exec(pre)
+  if (name) {
+    name = name[0]
+    pre = pre.substring(name.length + 1).trim()
+  }
+
   if (reducers[pre]) {
     // find and add reducer
-    var name = pre + '(' + parsed.body + ')'
+    if (!name) {
+      name = pre + '(' + parsed.body + ')'
+    }
     var params = [path + '["' + name + '"]']
     if (parsed.body) { params.push('item' + propPath(parsed.body)) }
 
