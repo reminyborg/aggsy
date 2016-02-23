@@ -2,22 +2,29 @@ var test = require('tape')
 var aggsy = require('./index')
 
 var cars = [
-  { model: 'volvo', make: 'v50', km: 100 },
-  { model: 'volvo', make: 'v50', km: 120 },
-  { model: 'volvo', make: 'v60', km: 200 },
-  { model: 'tesla', make: 's', km: 250 },
-  { model: 'tesla', make: 's', km: 120 },
-  { model: 'tesla', make: 's', km: 10 },
-  { model: 'tesla', make: 'x', km: 20 },
-  { model: 'vw', make: 'touran', km: 100 }
+  { model: 'volvo', detail: { make: 'v50' }, km: 100 },
+  { model: 'volvo', detail: { make: 'v50' }, km: 120 },
+  { model: 'volvo', detail: { make: 'v60' }, km: 200 },
+  { model: 'tesla', detail: { make: 's' }, km: 250 },
+  { model: 'tesla', detail: { make: 's' }, km: 120 },
+  { model: 'tesla', detail: { make: 's' }, km: 10 },
+  { model: 'tesla', detail: { make: 'x' }, km: 20 },
+  { model: 'vw', detail: { make: 'touran' }, km: 100 }
 ]
 
-var simpleGrouping = { tesla: [ { km: 250, make: 's', model: 'tesla' }, { km: 120, make: 's', model: 'tesla' }, { km: 10, make: 's', model: 'tesla' }, { km: 20, make: 'x', model: 'tesla' } ], volvo: [ { km: 100, make: 'v50', model: 'volvo' }, { km: 120, make: 'v50', model: 'volvo' }, { km: 200, make: 'v60', model: 'volvo' } ], vw: [ { km: 100, make: 'touran', model: 'vw' } ] }
+var simpleGrouping = { tesla: [ { detail: { make: 's' }, km: 250, model: 'tesla' }, { detail: { make: 's' }, km: 120, model: 'tesla' }, { detail: { make: 's' }, km: 10, model: 'tesla' }, { detail: { make: 'x' }, km: 20, model: 'tesla' } ], volvo: [ { detail: { make: 'v50' }, km: 100, model: 'volvo' }, { detail: { make: 'v50' }, km: 120, model: 'volvo' }, { detail: { make: 'v60' }, km: 200, model: 'volvo' } ], vw: [ { detail: { make: 'touran' }, km: 100, model: 'vw' } ] } 
+
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
 
+var dotNotationGrouping = { s: [ { detail: { make: 's' }, km: 250, model: 'tesla' }, { detail: { make: 's' }, km: 120, model: 'tesla' }, { detail: { make: 's' }, km: 10, model: 'tesla' } ], touran: [ { detail: { make: 'touran' }, km: 100, model: 'vw' } ], v50: [ { detail: { make: 'v50' }, km: 100, model: 'volvo' }, { detail: { make: 'v50' }, km: 120, model: 'volvo' } ], v60: [ { detail: { make: 'v60' }, km: 200, model: 'volvo' } ], x: [ { detail: { make: 'x' }, km: 20, model: 'tesla' } ] }
+
+var dotNotationAggs = { s: { '_count()': 3, '_sum(km)': 380 }, touran: { '_count()': 1, '_sum(km)': 100 }, v50: { '_count()': 2, '_sum(km)': 220 }, v60: { '_count()': 1, '_sum(km)': 200 }, x: { '_count()': 1, '_sum(km)': 20 } }
+
 test('#aggsy', function (t) {
-  t.plan(3)
+  t.plan(5)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
+  t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
+  t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
 })

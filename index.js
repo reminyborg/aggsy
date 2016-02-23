@@ -6,8 +6,8 @@ var leading = /(^[\s*,]+)/
 var functions = {
   '_sum': function (parentPath, params) {
     var name = '_sum(' + params + ')'
-    var path = parentPath + '[\'' + name + '\']'
-    var value = 'item[\'' + params + '\']'
+    var path = parentPath + '["' + name + '"]'
+    var value = 'item' + propPath(params)
 
     var func = '// ' + '_sum(' + params + ')\n'
     func += 'if (typeof ' + path + ' === \'undefined\') { ' + path + ' = ' + value + '; }\n'
@@ -18,10 +18,10 @@ var functions = {
 
   '_count': function (parentPath) {
     var name = '_count()'
-    var path = parentPath + '[\'' + name + '\']'
+    var path = parentPath + '["' + name + '"]'
 
     var func = '// ' + name + '\n'
-    func += 'if (typeof ' + path + ' === \'undefined\') { ' + path + ' = 1; }\n'
+    func += 'if (typeof ' + path + ' === "undefined") { ' + path + ' = 1; }\n'
     func += 'else { ' + path + '++; }\n\n'
 
     return func
@@ -47,6 +47,10 @@ function aggsy (agg, data) {
   return result
 }
 
+function propPath (path) { 
+  return '["' + path.split(".").join('"]["') + '"]' 
+}
+
 function genFunction (agg, path) {
   var func = '\n'
   path = path || 'result'
@@ -62,7 +66,7 @@ function genFunction (agg, path) {
     }
   } else {
     func += '// ' + pre + '\n'
-    path += '[item[\'' + pre + '\']]'
+    path += '[item' + propPath(pre) + ']'
 
     if (!parsed.body) {
       func += 'if (!' + path + ') { ' + path + ' = []; }\n'
