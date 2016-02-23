@@ -33,9 +33,14 @@ test('#aggsy', function (t) {
 })
 
 test('#reducers', function (t) {
-  t.plan(4)
+  t.plan(5)
   t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
   t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
   t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
   t.same(aggsy('_max(km)', cars), { '_max(km)': 250 }, '_max')
+
+  var reducers = {
+    '_last': function (prev, curr) { console.log(curr); return curr }
+  }
+  t.same(aggsy('_last(km), _max(km)', { reducers: reducers }, cars), { '_last(km)': 100, '_max(km)': 250 }, 'custom reducer')
 })

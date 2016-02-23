@@ -4,20 +4,34 @@ var debug = require('debug')('aggsy.function')
 var leading = /^[\s,]+/
 var findName = /^[\w.]+(?=:)/
 
-var reducers = require('./reducers')
+var defaultReducers = require('./reducers')
 
-function aggsy (query, data) {
+function aggsy (query, options, data) {
   debug(query)
+  if (Object.prototype.toString.call(options) === '[object Array]') {
+    data = options
+    options = undefined
+  }
+
+  options = options || {}
+
+  var reducers = options.reducers || defaultReducers
+  if (options.reducers) {
+    for (var n in defaultReducers) {
+      if (!reducers[n]) reducers[n] = defaultReducers[n]
+    }
+  }
+
   var funcText = '\n// reducers\n'
 
   for (var name in reducers) {
     if (typeof reducers[name] !== 'function') { throw new Error('reducers must be functions') }
     if (query.indexOf(name) !== -1) {
-      funcText += reducers[name].toString() + '\n'
+      funcText += 'var ' + name + ' = ' + reducers[name].toString() + '\n'
     }
   }
 
-  funcText += genFunction(query)
+  funcText += genFunction(query, reducers)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
 
@@ -38,11 +52,14 @@ function propPath (path) {
   return '["' + path.split('.').join('"]["') + '"]'
 }
 
-function genFunction (agg, path) {
+function genFunction (agg, reducers, path) {
   var func = '\n'
   path = path || 'result'
 
   var parsed = balanced('(', ')', agg)
+  if (!parsed) {
+    throw new Error('aggsy query faulty. check if used reducers are defined')
+  }
 
   var pre = parsed.pre.replace(leading, '')
 
@@ -68,7 +85,7 @@ function genFunction (agg, path) {
     func += params[0] + ' = ' + pre + '(' + params.join(', ') + ')\n'
     if (parsed.post) {
       // more to parse
-      func += genFunction(parsed.post, path)
+      func += genFunction(parsed.post, reducers, path)
     }
   } else {
     func += '// ' + pre + '\n'
@@ -81,7 +98,7 @@ function genFunction (agg, path) {
     } else {
       // reducers defined, more to parse
       func += 'if (!' + path + ') { ' + path + ' = {} }\n'
-      func += genFunction(parsed.body, path)
+      func += genFunction(parsed.body, reducers, path)
     }
   }
 
