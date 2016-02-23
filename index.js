@@ -6,18 +6,18 @@ var findName = /^[\w.]+(?=:)/
 
 var reducers = require('./reducers')
 
-function aggsy (agg, data) {
-  debug(agg)
+function aggsy (query, data) {
+  debug(query)
   var funcText = '\n// reducers\n'
 
   for (var name in reducers) {
     if (typeof reducers[name] !== 'function') { throw new Error('reducers must be functions') }
-    if (agg.indexOf(name) !== -1) {
+    if (query.indexOf(name) !== -1) {
       funcText += reducers[name].toString() + '\n'
     }
   }
 
-  funcText += genFunction(agg)
+  funcText += genFunction(query)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
 
