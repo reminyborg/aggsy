@@ -3,34 +3,18 @@ var debug = require('debug')('aggsy.function')
 
 var leading = /(^[\s*,]+)/
 
-var functions = {
-  '_sum': function (parentPath, params) {
-    var name = '_sum(' + params + ')'
-    var path = parentPath + '["' + name + '"]'
-    var value = 'item' + propPath(params)
-
-    var func = '// ' + '_sum(' + params + ')\n'
-    func += 'if (typeof ' + path + ' === \'undefined\') { ' + path + ' = ' + value + '; }\n'
-    func += 'else { ' + path + ' += ' + value + '; }\n\n'
-
-    return func
-  },
-
-  '_count': function (parentPath) {
-    var name = '_count()'
-    var path = parentPath + '["' + name + '"]'
-
-    var func = '// ' + name + '\n'
-    func += 'if (typeof ' + path + ' === "undefined") { ' + path + ' = 1; }\n'
-    func += 'else { ' + path + '++; }\n\n'
-
-    return func
-  }
-}
+var reducers = require('./reducers')
 
 function aggsy (agg, data) {
   debug(agg)
-  var funcText = genFunction(agg)
+  var funcText = '\n'
+
+  for (var name in reducers) {
+    if (typeof reducers[name] !== 'function') { throw new Error('reducers must be functions') }
+    funcText += reducers[name].toString() + '\n'
+  }
+
+  funcText += genFunction(agg)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
 
@@ -59,9 +43,22 @@ function genFunction (agg, path) {
 
   var pre = parsed.pre.replace(leading, '')
 
-  if (functions[pre]) {
-    func += functions[pre](path, parsed.body)
+  /* var name = '_sum(' + params + ')'
+  var path = parentPath + '["' + name + '"]'
+  var value = 'item' + propPath(params) */
+  if (reducers[pre]) {
+    // find and add reducer
+    var name = pre + '(' + parsed.body + ')'
+    var params = [path + '["' + name + '"]']
+    if (parsed.body) { params.push('item' + propPath(parsed.body)) }
+
+    func += '// ' + name + '\n'
+    if (typeof reducers[pre].initialValue !== 'undefined') {
+      func += 'if (typeof ' + params[0] + ' === "undefined") { ' + params[0] + ' = ' + reducers[pre].initialValue + ' }\n'
+    }
+    func += params[0] + ' = ' + pre + '(' + params.join(', ') + ')\n'
     if (parsed.post) {
+      // more to parse
       func += genFunction(parsed.post, path)
     }
   } else {
@@ -69,10 +66,12 @@ function genFunction (agg, path) {
     path += '[item' + propPath(pre) + ']'
 
     if (!parsed.body) {
-      func += 'if (!' + path + ') { ' + path + ' = []; }\n'
-      func += path + '.push(item);\n\n'
+      // no reducers defined then return all items in grouping
+      func += 'if (!' + path + ') { ' + path + ' = [] }\n'
+      func += path + '.push(item);\n'
     } else {
-      func += 'if (!' + path + ') { ' + path + ' = {}; }\n\n'
+      // reducers defined, more to parse
+      func += 'if (!' + path + ') { ' + path + ' = {} }\n'
       func += genFunction(parsed.body, path)
     }
   }
