@@ -9,12 +9,12 @@ function _count (prev, curr) {
 _count.initialValue = 0
 
 function _min (prev, curr) {
-  if (typeof prev === 'undefined' || prev > curr) return curr
+  if (prev > curr) return curr
   else return prev
 }
 
 function _max (prev, curr) {
-  if (typeof prev === 'undefined' || prev < curr) return curr
+  if (prev < curr) return curr
   else return prev
 }
 

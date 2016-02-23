@@ -79,10 +79,16 @@ function genFunction (agg, reducers, path) {
     if (parsed.body) { params.push('item' + propPath(parsed.body)) }
 
     func += '// ' + name + '\n'
+    func += 'if (typeof ' + params[0] + ' === "undefined") '
     if (typeof reducers[pre].initialValue !== 'undefined') {
-      func += 'if (typeof ' + params[0] + ' === "undefined") { ' + params[0] + ' = ' + reducers[pre].initialValue + ' }\n'
+      var initialParams = params.slice(1)
+      initialParams.unshift(reducers[pre].initialValue)
+      func += params[0] + ' = ' + pre + '(' + initialParams.join(', ') + ')\n'
+    } else {
+      func += params[0] + ' = ' + params[1] + '\n'
     }
-    func += params[0] + ' = ' + pre + '(' + params.join(', ') + ')\n'
+
+    func += 'else ' + params[0] + ' = ' + pre + '(' + params.join(', ') + ')\n'
     if (parsed.post) {
       // more to parse
       func += genFunction(parsed.post, reducers, path)
