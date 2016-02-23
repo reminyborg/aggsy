@@ -1,5 +1,5 @@
 var balanced = require('balanced-match')
-var debug = require('debug')('aggsy.function')
+var debug = require('debug')('aggsy')
 
 var leading = /^[\s,]+/
 var findName = /^[\w.]+(?=:)/
