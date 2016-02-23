@@ -28,3 +28,11 @@ test('#aggsy', function (t) {
   t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
   t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
 })
+
+test('#reducers', function (t) {
+  t.plan(4)
+  t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
+  t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
+  t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
+  t.same(aggsy('_max(km)', cars), { '_max(km)': 250 }, '_max')
+})
