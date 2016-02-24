@@ -22,22 +22,27 @@ var dotNotationAggs = { s: { '_count()': 3, '_sum(km)': 380 }, touran: { '_count
 
 var namedReducers = { tesla: { distance: 400, reports: 4 }, volvo: { distance: 420, reports: 3 }, vw: { distance: 100, reports: 1 } }
 
+var nestedAggs = { count: 8, tesla: { count: 4, s: { count: 3 }, x: { count: 1 } }, volvo: { count: 3, v50: { count: 2 }, v60: { count: 1 } }, vw: { count: 1, touran: { count: 1 } } }
+
 test('#aggsy', function (t) {
-  t.plan(6)
+  t.plan(7)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
   t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
   t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
+  t.same(aggsy('model(detail.make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
 })
 
 test('#reducers', function (t) {
-  t.plan(5)
+  t.plan(7)
   t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
   t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
   t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
   t.same(aggsy('_max(km)', cars), { '_max(km)': 250 }, '_max')
+  t.same(aggsy('_avg(km)', cars), { '_avg(km)': { count: 8, value: 115.00000000000001 } }, '_avg')
+  t.same(aggsy('_stdev(km)', cars), { '_stdev(km)': { average: 115.00000000000001, count: 8, value: 67.84457955963455, variance: 4602.886975623584 } }, '_stdev')
 
   t.same(aggsy('_last(km), _max(km)', cars, {
     reducers: { '_last': function (prev, curr) { return curr } }
