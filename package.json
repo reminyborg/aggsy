@@ -6,6 +6,10 @@
   "scripts": {
     "test": "standard && node test.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/reminyborg/aggsy.git"
+  },
   "keywords": [
     "aggregation",
     "language",
