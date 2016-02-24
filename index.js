@@ -6,11 +6,11 @@ var findName = /^[\w.]+(?=:)/
 
 var defaultReducers = require('./reducers')
 
-function aggsy (query, options, data) {
+function aggsy (query, data, options) {
   debug(query)
-  if (Object.prototype.toString.call(options) === '[object Array]') {
-    data = options
-    options = undefined
+  if (Object.prototype.toString.call(data) !== '[object Array]') {
+    options = data
+    data = undefined
   }
 
   options = options || {}
