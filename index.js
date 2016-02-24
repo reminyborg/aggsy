@@ -82,7 +82,7 @@ function genFunction (agg, reducers, path) {
     func += 'if (typeof ' + params[0] + ' === "undefined") '
     if (typeof reducers[pre].initialValue !== 'undefined') {
       var initialParams = params.slice(1)
-      initialParams.unshift(reducers[pre].initialValue)
+      initialParams.unshift(JSON.stringify(reducers[pre].initialValue))
       func += params[0] + ' = ' + pre + '(' + initialParams.join(', ') + ')\n'
     } else {
       func += params[0] + ' = ' + params[1] + '\n'
