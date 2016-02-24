@@ -95,16 +95,20 @@ function genFunction (agg, reducers, path) {
     }
   } else {
     func += '// ' + pre + '\n'
-    path += '[item' + propPath(pre) + ']'
+    var newPath = path + '[item' + propPath(pre) + ']'
 
     if (!parsed.body) {
       // no reducers defined then return all items in grouping
-      func += 'if (!' + path + ') { ' + path + ' = [] }\n'
-      func += path + '.push(item);\n'
+      func += 'if (!' + newPath + ') { ' + newPath + ' = [] }\n'
+      func += newPath + '.push(item);\n'
     } else {
       // reducers defined, more to parse
-      func += 'if (!' + path + ') { ' + path + ' = {} }\n'
-      func += genFunction(parsed.body, reducers, path)
+      func += 'if (!' + newPath + ') { ' + newPath + ' = {} }\n'
+      func += genFunction(parsed.body, reducers, newPath)
+    }
+    if (parsed.post) {
+      // more to parse
+      func += genFunction(parsed.post, reducers, path)
     }
   }
 
