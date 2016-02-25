@@ -70,11 +70,11 @@ Given a structure
 ```javascript
 { model: 'volvo', details: { make: 'v50' }, km: 100 }
 ```
-To group on model use `model()``
+To group on `model` use `model()``
 ```javascript
 { volvo: [/* items with model: volvo */] }
 ```
-To group on make use dot notation `details.make()``
+To group on `make` use dot notation `details.make()``
 ```javascript
 { v50: [/* items with details.make: v50 */] }
 ```
