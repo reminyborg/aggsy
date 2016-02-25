@@ -13,7 +13,7 @@ var cars = [
 ]
 
 var people = [
-  { name: 'Bill', car: 'Toyota' },
+  { name: 'Bill', car: 'Toyota', hair: { color: 'white' } },
   { name: 'Jane', car: 'Lexus' },
   { name: 'Bob' }  // car property missing
 ]
@@ -31,15 +31,25 @@ var namedReducers = { tesla: { distance: 400, reports: 4 }, volvo: { distance: 4
 var nestedAggs = { count: 8, tesla: { count: 4, s: { count: 3 }, x: { count: 1 } }, volvo: { count: 3, v50: { count: 2 }, v60: { count: 1 } }, vw: { count: 1, touran: { count: 1 } } }
 
 test('#aggsy', function (t) {
-  t.plan(8)
+  t.plan(5)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
-  t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
-  t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
   t.same(aggsy('model(detail.make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
-  t.same(aggsy('car()', people), { Lexus: [ { car: 'Lexus', name: 'Jane' } ], Toyota: [ { car: 'Toyota', name: 'Bill' } ], undefined: [ { name: 'Bob' } ] }, 'missing property')
+})
+
+test('#aggsy missing', function (t) {
+  t.plan(2)
+  t.same(aggsy('car()', people), { Lexus: [ { car: 'Lexus', name: 'Jane' } ], Toyota: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ] }, 'default: do not show missing property')
+  t.same(aggsy('car()', people, { missing: '_leftovers' }), { Lexus: [ { car: 'Lexus', name: 'Jane' } ], Toyota: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ], _leftovers: [ { name: 'Bob' } ] }, 'missing grouping name')
+})
+
+test('#aggsy dot notation', function (t) {
+  t.plan(3)
+  t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
+  t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
+  t.same(aggsy('hair.color()', people), { white: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ] }, 'dot notation value does not exist deep')
 })
 
 test('#reducers', function (t) {
