@@ -125,7 +125,7 @@ function _myownsum (prev, curr) { return prev + curr }
 _myownsum.initialValue = 0
 var options = { reducers: { '_myowsum': _myowsum } }
 
-aggsy('_last(km)', data, options)
+aggsy('_myownsum(km)', data, options)
 // or
 var aggregate = aggsy('_myownsum(km)', options)
 ```
