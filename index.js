@@ -31,7 +31,7 @@ function aggsy (query, data, options) {
     }
   }
 
-  funcText += genFunction(query, reducers)
+  funcText += genFunction(query, reducers, options)
   debug(funcText)
   var func = new Function ('result', 'item', funcText) // eslint-disable-line
 
@@ -48,11 +48,12 @@ function aggsy (query, data, options) {
   return result
 }
 
-function propPath (path) {
-  return '["' + path.split('.').join('"]["') + '"]'
+function propPath (name, path) {
+  var parts = path.split('.')
+  return Array(parts.length).join('(') + name + '["' + parts.join('"] || false)["') + '"]'
 }
 
-function genFunction (agg, reducers, path) {
+function genFunction (agg, reducers, options, path) {
   var func = '\n'
   path = path || 'result'
 
@@ -76,10 +77,10 @@ function genFunction (agg, reducers, path) {
       name = pre + '(' + parsed.body + ')'
     }
     var params = [path + '["' + name + '"]']
-    if (parsed.body) { params.push('item' + propPath(parsed.body)) }
+    if (parsed.body) { params.push(propPath('item', parsed.body)) }
 
     func += '// ' + name + '\n'
-    func += 'if (typeof ' + params[0] + ' === "undefined") '
+    func += 'if (' + params[0] + ' === undefined) '
     if (typeof reducers[pre].initialValue !== 'undefined') {
       var initialParams = params.slice(1)
       initialParams.unshift(JSON.stringify(reducers[pre].initialValue))
@@ -91,12 +92,17 @@ function genFunction (agg, reducers, path) {
     func += 'else ' + params[0] + ' = ' + pre + '(' + params.join(', ') + ')\n'
     if (parsed.post) {
       // more to parse
-      func += genFunction(parsed.post, reducers, path)
+      func += genFunction(parsed.post, reducers, options, path)
     }
   } else {
     func += '// ' + pre + '\n'
-    var newPath = path + '[item' + propPath(pre) + ']'
+    var propName = pre.replace('.', '_')
+    func += 'var ' + propName + ' = ' + propPath('item', pre) + '\n'
 
+    if (!options.missing) func += 'if (' + propName + ' !== undefined) {\n'
+    else func += 'if (' + propName + ' === undefined) ' + propName + ' = "' + options.missing + '"\n'
+
+    var newPath = path + '[' + propName + ']'
     if (!parsed.body) {
       // no reducers defined then return all items in grouping
       func += 'if (!' + newPath + ') { ' + newPath + ' = [] }\n'
@@ -104,11 +110,13 @@ function genFunction (agg, reducers, path) {
     } else {
       // reducers defined, more to parse
       func += 'if (!' + newPath + ') { ' + newPath + ' = {} }\n'
-      func += genFunction(parsed.body, reducers, newPath)
+      func += genFunction(parsed.body, reducers, options, newPath)
     }
+    if (!options.missing) func += '}\n'
+
     if (parsed.post) {
       // more to parse
-      func += genFunction(parsed.post, reducers, path)
+      func += genFunction(parsed.post, reducers, options, path)
     }
   }
 

@@ -12,6 +12,12 @@ var cars = [
   { model: 'vw', detail: { make: 'touran' }, km: 100 }
 ]
 
+var people = [
+  { name: 'Bill', car: 'Toyota', hair: { color: 'white' } },
+  { name: 'Jane', car: 'Lexus' },
+  { name: 'Bob' }  // car property missing
+]
+
 var simpleGrouping = { tesla: [ { detail: { make: 's' }, km: 250, model: 'tesla' }, { detail: { make: 's' }, km: 120, model: 'tesla' }, { detail: { make: 's' }, km: 10, model: 'tesla' }, { detail: { make: 'x' }, km: 20, model: 'tesla' } ], volvo: [ { detail: { make: 'v50' }, km: 100, model: 'volvo' }, { detail: { make: 'v50' }, km: 120, model: 'volvo' }, { detail: { make: 'v60' }, km: 200, model: 'volvo' } ], vw: [ { detail: { make: 'touran' }, km: 100, model: 'vw' } ] }
 
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
@@ -25,14 +31,25 @@ var namedReducers = { tesla: { distance: 400, reports: 4 }, volvo: { distance: 4
 var nestedAggs = { count: 8, tesla: { count: 4, s: { count: 3 }, x: { count: 1 } }, volvo: { count: 3, v50: { count: 2 }, v60: { count: 1 } }, vw: { count: 1, touran: { count: 1 } } }
 
 test('#aggsy', function (t) {
-  t.plan(7)
+  t.plan(5)
   t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
-  t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
-  t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
   t.same(aggsy('model(detail.make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
+})
+
+test('#aggsy missing', function (t) {
+  t.plan(2)
+  t.same(aggsy('car()', people), { Lexus: [ { car: 'Lexus', name: 'Jane' } ], Toyota: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ] }, 'default: do not show missing property')
+  t.same(aggsy('car()', people, { missing: '_leftovers' }), { Lexus: [ { car: 'Lexus', name: 'Jane' } ], Toyota: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ], _leftovers: [ { name: 'Bob' } ] }, 'missing grouping name')
+})
+
+test('#aggsy dot notation', function (t) {
+  t.plan(3)
+  t.same(aggsy('detail.make()', cars), dotNotationGrouping, 'dot notation grouping')
+  t.same(aggsy('detail.make(_sum(km),_count())', cars), dotNotationAggs, 'dot notation aggs')
+  t.same(aggsy('hair.color()', people), { white: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ] }, 'dot notation value does not exist deep')
 })
 
 test('#reducers', function (t) {
