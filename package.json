@@ -20,6 +20,9 @@
   "author": "Remi Nyborg <remi@nyborg.priv.no> (http://reminyborg.com)",
   "license": "MIT",
   "devDependencies": {
+    "async-series": "0.0.1",
+    "beautify-benchmark": "^0.2.4",
+    "benchmark": "^2.1.0",
     "standard": "^6.0.6",
     "tape": "^4.4.0"
   },
