@@ -99,6 +99,16 @@ If no reducers or nested groups are defined within a group ex: `model()` all the
 **_max(property)**
 *Int*
 
+#### First
+**_first(property)**
+
+#### Last
+**_last(property)**
+
+#### Has
+**_has(property)**
+*Bool*
+
 #### Average / Mean
 **_avg(property)**
 *{ value: 0, count: 0 }*
