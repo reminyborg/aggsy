@@ -53,11 +53,14 @@ test('#aggsy dot notation', function (t) {
 })
 
 test('#reducers', function (t) {
-  t.plan(7)
+  t.plan(10)
   t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
   t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
   t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
   t.same(aggsy('_max(km)', cars), { '_max(km)': 250 }, '_max')
+  t.same(aggsy('_first(model)', cars), { '_first(model)': 'volvo' }, '_first')
+  t.same(aggsy('_last(model)', cars), { '_last(model)': 'vw' }, '_last')
+  t.same(aggsy('_has(model), _has(test)', cars), { '_has(model)': true, '_has(test)': false }, '_has')
   t.same(aggsy('_avg(km)', cars), { '_avg(km)': { count: 8, value: 115.00000000000001 } }, '_avg')
   t.same(aggsy('_stdev(km)', cars), { '_stdev(km)': { average: 115.00000000000001, count: 8, value: 67.84457955963455, variance: 4602.886975623584 } }, '_stdev')
 

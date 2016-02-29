@@ -18,6 +18,21 @@ function _max (prev, curr) {
   else return prev
 }
 
+function _first (prev, curr) {
+  if (!prev) return curr
+  else return prev
+}
+
+function _last (prev, curr) {
+  return curr
+}
+
+function _has (prev, curr) {
+  if (!prev) return !!curr
+  else return prev
+}
+_has.initialValue = false
+
 // newAverage = average + ((value - average) / index)
 function _avg (d, curr) {
   d.count++
@@ -41,6 +56,9 @@ module.exports = {
   '_count': _count,
   '_min': _min,
   '_max': _max,
+  '_first': _first,
+  '_last': _last,
+  '_has': _has,
   '_avg': _avg,
   '_stdev': _stdev
 }
