@@ -2,6 +2,8 @@
 
 Aggsy is a aggregation language/module for easy use in http query strings
 
+Try it online at https://aggsyplay.com
+
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 ## Installation
