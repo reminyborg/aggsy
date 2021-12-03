@@ -59,7 +59,7 @@ test('#aggsy', function (t) {
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
-  t.same(aggsy('model(detail.make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
+  t.same(aggsy('model(make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
 })
 
 test('#aggsy missing', function (t) {
