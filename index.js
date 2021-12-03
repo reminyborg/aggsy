@@ -91,8 +91,8 @@ function genFunction (agg, reducers, options, path) {
     var params = [path + '["' + name + '"]']
     if (parsed.body) { params.push(propPath('item', parsed.body)) }
 
-    func += '/** Reducer: ' + name + ' */\n'
-    func += 'if (' + params[0] + ' === undefined) '
+    func += '/** REDUCER: ' + name + ' */\n'
+    func += `if (typeof ${params[0]}  === 'undefined') `
     if (typeof reducers[pre].initialValue !== 'undefined') {
       var initialParams = params.slice(1)
       initialParams.unshift(JSON.stringify(reducers[pre].initialValue))
@@ -107,14 +107,21 @@ function genFunction (agg, reducers, options, path) {
       func += genFunction(parsed.post, reducers, options, path)
     }
   } else {
-    func += `/** Prop: ${pre} */\n`
+    var group = pre
+    func += `/** GROUP: ${group} */\n`
     var propName = pre.replace('.', '_')
-    func += `var ${propName} = ${propPath('item', pre)}\n`
+    func += `var ${propName} = ${propPath('item', group)}\n`
 
     if (!options.missing) func += `if (typeof ${propName} !== 'undefined') {\n`
     else func += `if (typeof ${propName} === 'undefined') ${propName} = '${options.missing}';\n`
 
-    var newPath = `${path}[${propName}]`
+    var newPath
+    if (options.showGrouping) {
+      newPath = `${path}['${group}'][${propName}]`
+      func += ensureExist(`${path}['${group}']`)
+    } else {
+      newPath = `${path}[${propName}]`
+    }
     if (!parsed.body) {
       // no reducers defined then return all items in grouping
       func += ensureExist(newPath, '[]') 
@@ -130,6 +137,7 @@ function genFunction (agg, reducers, options, path) {
       // more to parse
       func += genFunction(parsed.post, reducers, options, path)
     }
+    func += `/** END-GROUP: ${pre} */\n`
   }
 
   return func
