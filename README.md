@@ -62,7 +62,8 @@ When run with only an query will return an [aggregate function](#advanced use)
 
 Following options are available:
 * `reducers` - optional list of [custom reducers](#custom reducers)
-* `missing` - (default: `false`)  grouping name to put items where grouping property does not exits
+* `missing` - (default: `false`) grouping name to put items where grouping property does not exits
+* `flatten` - (default: `false`) flatten groups into 
 
 ## Query language
 

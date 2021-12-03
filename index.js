@@ -22,18 +22,26 @@ function aggsy (query, data, options) {
     }
   }
 
-  var funcText = '\n// reducers\n'
-
-  for (var name in reducers) {
+  var reducersText = Object.keys(reducers).map((name) => {
     if (typeof reducers[name] !== 'function') { throw new Error('reducers must be functions') }
     if (query.indexOf(name) !== -1) {
-      funcText += 'var ' + name + ' = ' + reducers[name].toString() + '\n'
+      return `var ${name} = ${reducers[name].toString()}`
     }
-  }
+    return false
+  }).filter(Boolean).join('\n')
 
-  funcText += genFunction(query, reducers, options)
+  var funcText = `
+/** Add used reducers */
+${reducersText}
+
+/** Create the iterator function */
+return function (result, item) {
+  ${genFunction(query, reducers, options)}
+}
+`
   debug(funcText)
-  var func = new Function ('result', 'item', funcText) // eslint-disable-line
+  var createFunction = new Function (funcText) // eslint-disable-line
+  var func = createFunction()
 
   if (!data) {
     return func
@@ -43,6 +51,10 @@ function aggsy (query, data, options) {
 
   for (var i = 0; i < data.length; i++) {
     func(result, data[i])
+  }
+
+  if (options.flatten) {
+    result = flatten(result)    
   }
 
   return result
@@ -79,7 +91,7 @@ function genFunction (agg, reducers, options, path) {
     var params = [path + '["' + name + '"]']
     if (parsed.body) { params.push(propPath('item', parsed.body)) }
 
-    func += '// ' + name + '\n'
+    func += '/** Reducer: ' + name + ' */\n'
     func += 'if (' + params[0] + ' === undefined) '
     if (typeof reducers[pre].initialValue !== 'undefined') {
       var initialParams = params.slice(1)
@@ -95,21 +107,21 @@ function genFunction (agg, reducers, options, path) {
       func += genFunction(parsed.post, reducers, options, path)
     }
   } else {
-    func += '// ' + pre + '\n'
+    func += `/** Prop: ${pre} */\n`
     var propName = pre.replace('.', '_')
-    func += 'var ' + propName + ' = ' + propPath('item', pre) + '\n'
+    func += `var ${propName} = ${propPath('item', pre)}\n`
 
-    if (!options.missing) func += 'if (' + propName + ' !== undefined) {\n'
-    else func += 'if (' + propName + ' === undefined) ' + propName + ' = "' + options.missing + '"\n'
+    if (!options.missing) func += `if (typeof ${propName} !== 'undefined') {\n`
+    else func += `if (typeof ${propName} === 'undefined') ${propName} = '${options.missing}';\n`
 
-    var newPath = path + '[' + propName + ']'
+    var newPath = `${path}[${propName}]`
     if (!parsed.body) {
       // no reducers defined then return all items in grouping
-      func += 'if (!' + newPath + ') { ' + newPath + ' = [] }\n'
-      func += newPath + '.push(item);\n'
+      func += ensureExist(newPath, '[]') 
+      func += `${newPath}.push(item);\n`
     } else {
       // reducers defined, more to parse
-      func += 'if (!' + newPath + ') { ' + newPath + ' = {} }\n'
+      func += ensureExist(newPath, '{}')
       func += genFunction(parsed.body, reducers, options, newPath)
     }
     if (!options.missing) func += '}\n'
@@ -121,6 +133,14 @@ function genFunction (agg, reducers, options, path) {
   }
 
   return func
+}
+
+function flatten (result) {
+  return result
+}
+
+function ensureExist (path, set) {
+  return `if (typeof ${path} === 'undefined') { ${path} = ${set || '{}'} };\n`
 }
 
 module.exports = aggsy

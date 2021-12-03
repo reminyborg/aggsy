@@ -36,13 +36,13 @@ function aggsyCreate (done) {
 function aggsyRun (done) {
   var data = Array(100000).fill({ model: 'tesla', make: 's', km: 10 })
   var createFunc = new Benchmark.Suite()
-  createFunc.add('aggsy run# one group', function () {
+  createFunc.add('aggsy run# one group over 100000', function () {
     aggsy('model()', data)
   })
-  .add('aggsy run# one reducer', function () {
+  .add('aggsy run# one reducer over 100000', function () {
     aggsy('_sum()', data)
   })
-  .add('aggsy run# groups and reducers', function () {
+  .add('aggsy run# groups and reducers over 100000', function () {
     aggsy('model(make(_sum(km)), _sum(km), _avg(km))', data)
   })
   .on('cycle', function (event) {
