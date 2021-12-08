@@ -41,21 +41,14 @@ var namedReducers = { tesla: { distance: 400, reports: 4 }, volvo: { distance: 4
 
 var nestedAggs = { count: 8, tesla: { count: 4, s: { count: 3 }, x: { count: 1 } }, volvo: { count: 3, v50: { count: 2 }, v60: { count: 1 } }, vw: { count: 1, touran: { count: 1 } } }
 
-var flattened = [
-  { model: 'tesla', distance: 400, reports: 4 },
-  { model: 'volvo', distance: 420, reports: 3 },
-  { model: 'vw', distance: 100, reports: 1 }
-]
+var flattened = [ { make: 'v50', distance: 220, count_per_make: 2, model: 'volvo', count: 3 }, { make: 'v60', distance: 200, count_per_make: 1, model: 'volvo', count: 3 }, { make: 's', distance: 380, count_per_make: 3, model: 'tesla', count: 4 }, { make: 'x', distance: 20, count_per_make: 1, model: 'tesla', count: 4 }, { make: 'touran', distance: 100, count_per_make: 1, model: 'vw', count: 1 } ]
 
-/* test.only('#aggsy', function (t) {
-  t.plan(1)
-  t.same(true, true)
-  console.log(aggsy('model(detail.make(distance: _sum(km), count_per_make:_count()), count:_count())', cars, { showGrouping: true }))
-})*/
+var simpleFlattened = [ { model: 'volvo', distance: 420, count: 3 }, { model: 'tesla', distance: 400, count: 4 }, { model: 'vw', distance: 100, count: 1 } ]
+
 
 test('#aggsy', function (t) {
   t.plan(5)
-  t.same(aggsy('model()', cars), simpleGrouping, 'simple grouping')
+  t.same(aggsy('model()', carsDot), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
@@ -73,6 +66,12 @@ test('#aggsy dot notation', function (t) {
   t.same(aggsy('detail.make()', carsDot), dotNotationGrouping, 'dot notation grouping')
   t.same(aggsy('detail.make(_sum(km),_count())', carsDot), dotNotationAggs, 'dot notation aggs')
   t.same(aggsy('hair.color()', people), { white: [ { car: 'Toyota', hair: { color: 'white' }, name: 'Bill' } ] }, 'dot notation value does not exist deep')
+})
+
+test('#aggsy flatten', function (t) {
+  t.plan(2)
+  t.same(aggsy('model(distance: _sum(km), count:_count())', cars, { flatten: true }), simpleFlattened)
+  t.same(aggsy('model(make(distance: _sum(km), count_per_make:_count()), count:_count())', cars, { flatten: true }), flattened)
 })
 
 test('#reducers', function (t) {
