@@ -30,9 +30,19 @@ aggsy('model(distance: _sum(km), reports: _count())', cars)
 
 // Gives:
 {
-  tesla: { 'reports': 2, 'distance': 330 },
-  volvo: { 'reports': 1, 'distance': 100 }
+  tesla: { reports: 2, distance: 330 },
+  volvo: { reports: 1, distance: 100 }
 }
+
+
+// You may also flatten the results
+aggsy('model(distance: _sum(km), reports: _count())', cars, { flatten: true })
+
+// Gives:
+[
+  { model: 'tesla', reports: 2, distance: 330 },
+  { model: 'volvo', reports: 1, distance: 100 }
+]
 ```
 
 *To aggregate on nested groups*
@@ -52,6 +62,15 @@ aggsy('model(make(count: _count()), count: _count())', cars)
   }
 }
 
+// Flatten
+aggsy('model(make(count: _count()), 'make.count': _count())', cars, { flatten: true })
+
+// Gives:
+[
+  { model: 'tesla' make: 's', 'make.count': 2, count: 3 },
+  { model: 'tesla' make: 'x', 'make.count': 1, count: 3 },
+  { model: 'volvo': make: 'v50', 'make.count': 1, count: 1 }
+}
 ```
 
 ## Aggsy(query[, data, options])
@@ -63,7 +82,7 @@ When run with only an query will return an [aggregate function](#advanced use)
 Following options are available:
 * `reducers` - optional list of [custom reducers](#custom reducers)
 * `missing` - (default: `false`) grouping name to put items where grouping property does not exits
-* `flatten` - (default: `false`) flatten groups into 
+* `flatten` - (default: `false`) flatten result
 
 ## Query language
 
@@ -142,35 +161,6 @@ var options = { reducers: { '_myowsum': _myowsum } }
 aggsy('_myownsum(km)', data, options)
 // or
 var aggregate = aggsy('_myownsum(km)', options)
-```
-
-## Advanced use
-If you call aggsy with only the query parameter it returns an aggregate function.
-This can be used in flexible ways.
-
-The aggregate function takes a mutable object and one item as parameters
-
-```javascript
-var result = {}
-var aggregate = aggsy(query)
-
-array.forEach(function (item) {
-  aggregate(result, item)
-})
-
-// result will be the aggregated result
-```
-
-Or on *Streams*
-
-```javascript
-var result = {}
-var aggregate = aggsy(query)
-
-stream.on('data', function (item) {
-  aggregate(result, item)
-})
-stream.on('end', function () { console.log(result)} )
 ```
 
 License
