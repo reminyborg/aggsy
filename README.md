@@ -82,7 +82,7 @@ When run with only an query will return an [aggregate function](#advanced use)
 Following options are available:
 * `reducers` - optional list of [custom reducers](#custom reducers)
 * `missing` - (default: `false`) grouping name to put items where grouping property does not exits
-* `flatten` - (default: `false`) flatten result
+* `flatten` - (default: `false`) flatten result (may also be set with `_flatten(query)`)
 
 ## Query language
 
@@ -102,6 +102,13 @@ To group on `make` use dot notation `details.make()``
 ```
 
 If no reducers or nested groups are defined within a group ex: `model()` all the items are returned in the groups
+
+### Options
+
+#### Flatten 
+**_flatten(query)**
+
+Sets the flatten value so you get flat results
 
 ### Reducers
 

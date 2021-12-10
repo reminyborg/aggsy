@@ -32,6 +32,9 @@ function aggsy (query, data, options) {
 
 
   const ast = parse(query, options)
+  if (ast.options) {
+    options = Object.assign(ast.options)
+  } 
   debug(JSON.stringify(ast, null, 2))
 
   var funcText = `
@@ -160,7 +163,12 @@ function parse (agg, options, ast, path) {
     pre = pre.substring(as.length + 1).trim()
   }
 
-  if (reducers[pre]) {
+  if (pre === '_flatten') {
+    ast.options = { flatten: true }
+    options = Object.assign({}, { flatten: true })
+    if (parsed.body) parse(parsed.body, options, ast, path)
+    if (parsed.post) parse(parsed.post, options, ast, path)
+  } else if (reducers[pre]) {
     if (!as) as = pre + '(' + parsed.body + ')'
     ast.reducers.push({
       name: pre, 

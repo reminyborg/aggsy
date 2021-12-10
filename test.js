@@ -69,9 +69,10 @@ test('#aggsy dot notation', function (t) {
 })
 
 test('#aggsy flatten', function (t) {
-  t.plan(2)
+  t.plan(3)
   t.same(aggsy('model(distance: _sum(km), count:_count())', cars, { flatten: true }), simpleFlattened)
   t.same(aggsy('model(make(distance: _sum(km), count_per_make:_count()), count:_count())', cars, { flatten: true }), flattened)
+  t.same(aggsy('_flatten(model(distance: _sum(km), count:_count()))', cars), simpleFlattened)
 })
 
 test('#reducers', function (t) {
