@@ -31,7 +31,7 @@ function aggsy (query, data, options) {
   }).filter(Boolean).join('\n')
 
 
-  const ast = parse(query, options)
+  const ast = parse(reducers, query, options)
   if (ast.options) {
     options = Object.assign(ast.options)
   } 
@@ -144,8 +144,7 @@ function genFunction ({ name, prop, path, groups, reducers}, options, parentObje
   return func 
 }
 
-function parse (agg, options, ast, path) {
-  const reducers = this.reducers || defaultReducers
+function parse (reducers, agg, options, ast, path) {
   ast = ast || { groups: [], reducers: [] }
   path = path || []
 
@@ -166,8 +165,8 @@ function parse (agg, options, ast, path) {
   if (pre === '_flatten') {
     ast.options = { flatten: true }
     options = Object.assign({}, { flatten: true })
-    if (parsed.body) parse(parsed.body, options, ast, path)
-    if (parsed.post) parse(parsed.post, options, ast, path)
+    if (parsed.body) parse(reducers, parsed.body, options, ast, path)
+    if (parsed.post) parse(reducers, parsed.post, options, ast, path)
   } else if (reducers[pre]) {
     if (!as) as = pre + '(' + parsed.body + ')'
     ast.reducers.push({
@@ -177,14 +176,14 @@ function parse (agg, options, ast, path) {
       body: parsed.body
     })
     
-    if (parsed.post) parse(parsed.post, options, ast, path) 
+    if (parsed.post) parse(reducers, parsed.post, options, ast, path) 
   } else {
     const prop = pre.replace('.', '_')
     const newPath = path.concat(options.showGroups || options.flatten ? [`'${prop}'`, prop] : prop)
     const group = { name: pre, prop, path: newPath, groups: [], reducers: [] }
     ast.groups.push(group)
-    if (parsed.body) parse(parsed.body, options, group, newPath)
-    if (parsed.post) parse(parsed.post, options, ast, path)
+    if (parsed.body) parse(reducers, parsed.body, options, group, newPath)
+    if (parsed.post) parse(reducers, parsed.post, options, ast, path)
   }
 
   return ast

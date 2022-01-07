@@ -87,7 +87,7 @@ test('#reducers', function (t) {
   t.same(aggsy('_avg(km)', cars), { '_avg(km)': { count: 8, value: 115.00000000000001 } }, '_avg')
   t.same(aggsy('_stdev(km)', cars), { '_stdev(km)': { average: 115.00000000000001, count: 8, value: 67.84457955963455, variance: 4602.886975623584 } }, '_stdev')
 
-  t.same(aggsy('_last(km), _max(km)', cars, {
-    reducers: { '_last': function (prev, curr) { return curr } }
-  }), { '_last(km)': 100, '_max(km)': 250 }, 'custom reducer')
+  t.same(aggsy('_last_one(km), _max(km)', cars, {
+    reducers: { '_last_one': function (prev, curr) { return curr } }
+  }), { '_last_one(km)': 100, '_max(km)': 250 }, 'custom reducer')
 })
