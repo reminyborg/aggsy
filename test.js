@@ -29,6 +29,11 @@ var people = [
   { name: 'Bob' }  // car property missing
 ]
 
+var emptyValue = [
+  { foo: 1 },
+  { }
+]
+
 var simpleGrouping = { volvo: [ { model: 'volvo', detail: { make: 'v50', seats: 5 }, km: 100 }, { model: 'volvo', detail: { make: 'v50', seats: 5 }, km: 120 }, { model: 'volvo', detail: { make: 'v60', seats: 7 }, km: 200 } ], tesla: [ { model: 'tesla', detail: { make: 's', seats: 7 }, km: 250 }, { model: 'tesla', detail: { make: 's', seats: 5 }, km: 120 }, { model: 'tesla', detail: { make: 's', seats: 5 }, km: 10 }, { model: 'tesla', detail: { make: 'x', seats: 6 }, km: 20 } ], vw: [ { model: 'vw', detail: { make: 'touran', seats: 7 }, km: 100 } ] } 
 
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
@@ -76,7 +81,7 @@ test('#aggsy flatten', function (t) {
 })
 
 test('#reducers', function (t) {
-  t.plan(10)
+  t.plan(11)
   t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
   t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
   t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
@@ -86,6 +91,8 @@ test('#reducers', function (t) {
   t.same(aggsy('_has(model), _has(test)', cars), { '_has(model)': true, '_has(test)': false }, '_has')
   t.same(aggsy('_avg(km)', cars), { '_avg(km)': { count: 8, value: 115.00000000000001 } }, '_avg')
   t.same(aggsy('_stdev(km)', cars), { '_stdev(km)': { average: 115.00000000000001, count: 8, value: 67.84457955963455, variance: 4602.886975623584 } }, '_stdev')
+
+  t.same(aggsy('foo: _sum(foo)', emptyValue), { 'foo': 1 })
 
   t.same(aggsy('_last_one(km), _max(km)', cars, {
     reducers: { '_last_one': function (prev, curr) { return curr } }

@@ -1,4 +1,5 @@
 function _sum (prev, curr) {
+  if (typeof curr === 'undefined') return prev
   return prev + curr
 }
 _sum.initialValue = 0
@@ -35,6 +36,7 @@ _has.initialValue = false
 
 // newAverage = average + ((value - average) / index)
 function _avg (d, curr) {
+  if (typeof curr === 'undefined') return d
   d.count++
   d.value = d.value + ((curr - d.value) / d.count)
   return d
@@ -43,6 +45,7 @@ _avg.initialValue = { value: 0, count: 0 }
 
 // newAverage = average + ((value - average) / index)
 function _stdev (d, curr) {
+  if (typeof curr === 'undefined') return d
   d.count++
   d.average = d.average + ((curr - d.average) / d.count)
   d.variance = d.variance + ((Math.pow(curr - d.average, 2) - d.variance) / d.count)
