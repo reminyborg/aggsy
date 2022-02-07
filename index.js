@@ -9,7 +9,7 @@ var defaultReducers = require('./reducers')
 function aggsy (query, data, options) {
   query = query.replace(/"/g,'')
   debug(query)
-  if (Object.prototype.toString.call(data) !== '[object Array]') {
+  if (!Array.isArray(data)) {
     options = data
     data = undefined
   }
