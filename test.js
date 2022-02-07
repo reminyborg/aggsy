@@ -126,7 +126,7 @@ test('#funky', function (t) {
   t.same(aggsy('@type(distance: _sum(km), reports: _count())', funky),funkyResult)
 })
 
-test.only('#bad', function (t) {
+test('#bad', function (t) {
   t.plan(2)
   t.same(aggsy('model(distance: _sum(foo",(()=>{while(true){}})(),"))', cars), { volvo: { distance: 0 }, tesla: { distance: 0 }, vw: { distance: 0 } })
   t.same(aggsy('mo"del"(distance: _count())', cars), { volvo: { distance: 3 }, tesla: { distance: 4 }, vw: { distance: 1 } }) 
