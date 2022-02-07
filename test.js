@@ -34,6 +34,24 @@ var emptyValue = [
   { }
 ]
 
+var funky = [
+  { "@type": "https://some.api/ICE", "model": "volvo", "make": "v50", "km": 100 },
+  { "@type": "https://some.api/BEV", "model": "tesla", "make": "s", "km": 200 },
+  { "@type": "https://some.api/BEV", "model": "tesla", "make": "s", "km": 120 },
+  { "@type": "https://some.api/BEV", "model": "tesla", "make": "x", "km": 10 }
+]
+
+var funkyResult = {
+  "https://some.api/ICE": {
+    "distance": 100,
+    "reports": 1
+  },
+  "https://some.api/BEV": {
+    "distance": 330,
+    "reports": 3
+  }
+}
+
 var simpleGrouping = { volvo: [ { model: 'volvo', detail: { make: 'v50', seats: 5 }, km: 100 }, { model: 'volvo', detail: { make: 'v50', seats: 5 }, km: 120 }, { model: 'volvo', detail: { make: 'v60', seats: 7 }, km: 200 } ], tesla: [ { model: 'tesla', detail: { make: 's', seats: 7 }, km: 250 }, { model: 'tesla', detail: { make: 's', seats: 5 }, km: 120 }, { model: 'tesla', detail: { make: 's', seats: 5 }, km: 10 }, { model: 'tesla', detail: { make: 'x', seats: 6 }, km: 20 } ], vw: [ { model: 'vw', detail: { make: 'touran', seats: 7 }, km: 100 } ] } 
 
 var simpleAggs = { tesla: { '_count()': 4, '_sum(km)': 400 }, volvo: { '_count()': 3, '_sum(km)': 420 }, vw: { '_count()': 1, '_sum(km)': 100 } }
@@ -52,11 +70,15 @@ var simpleFlattened = [ { model: 'volvo', distance: 420, count: 3 }, { model: 't
 
 
 test('#aggsy', function (t) {
-  t.plan(5)
+  t.plan(4)
   t.same(aggsy('model()', carsDot), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
+})
+
+test('#aggsy nested', function (t) {
+  t.plan(1)
   t.same(aggsy('model(make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
 })
 
@@ -97,4 +119,15 @@ test('#reducers', function (t) {
   t.same(aggsy('_last_one(km), _max(km)', cars, {
     reducers: { '_last_one': function (prev, curr) { return curr } }
   }), { '_last_one(km)': 100, '_max(km)': 250 }, 'custom reducer')
+})
+
+test('#funky', function (t) {
+  t.plan(1)
+  t.same(aggsy('@type(distance: _sum(km), reports: _count())', funky),funkyResult)
+})
+
+test.only('#bad', function (t) {
+  t.plan(2)
+  t.same(aggsy('model(distance: _sum(foo",(()=>{while(true){}})(),"))', cars), { volvo: { distance: 0 }, tesla: { distance: 0 }, vw: { distance: 0 } })
+  t.same(aggsy('mo"del"(distance: _count())', cars), { volvo: { distance: 3 }, tesla: { distance: 4 }, vw: { distance: 1 } }) 
 })

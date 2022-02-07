@@ -7,11 +7,13 @@ var findName = /^[\w.]+(?=:)/
 var defaultReducers = require('./reducers')
 
 function aggsy (query, data, options) {
+  query = query.replace(/"/g,'')
   debug(query)
   if (Object.prototype.toString.call(data) !== '[object Array]') {
     options = data
     data = undefined
   }
+
 
   options = options || {}
 
@@ -31,7 +33,7 @@ function aggsy (query, data, options) {
   }).filter(Boolean).join('\n')
 
 
-  const ast = parse(reducers, query, options)
+  const ast = parse({ reducers }, query, options)
   if (ast.options) {
     options = Object.assign(ast.options)
   } 
@@ -41,7 +43,7 @@ function aggsy (query, data, options) {
 /** Add used reducers */
 ${reducersText}
 
-const tmp = {}
+const _tmp = {}
 
 /** Create the iterator function */
 return function (result, item) {
@@ -85,10 +87,15 @@ function createPath (prefix, path, options) {
   return `${prefix}[${path.join('][')}]`
 }
 
-function genFunction ({ name, prop, path, groups, reducers}, options, parentObject) {
+function genFunction ({ name, id, groups, reducers}, options, parentPath) {
+  path = parentPath || []
   const leaf = options.flatten && !groups.length
+  if (id) {
+    var prop = 'group' + id
+    path = path.concat(options.showGroups || options.flatten ? [`'${name}'`, prop] : prop)
+  }
   let func = ''
-  const resultObject = !options.flatten || leaf ? 'result' : 'tmp'
+  const resultObject = !options.flatten || leaf ? 'result' : '_tmp'
   const resultProp = createPath(resultObject, path, options)
   if (name) {
     func += `\n/** GROUP: ${name} */\n`
@@ -109,11 +116,10 @@ function genFunction ({ name, prop, path, groups, reducers}, options, parentObje
       // reducers or groups defined
       let newObject = '{}'
       if (options.flatten && path.length > 2) {
-        const parentPath = createPath('tmp', path.slice(0, -2), options)
-        newObject = `Object.create(${parentPath})`
+        newObject = `Object.create(${createPath('_tmp', parentPath, options)})`
       }
       func += ensureExist(resultProp, newObject)
-      if (options.flatten) func += `${resultProp}['${prop}'] = ${prop}\n`
+      if (options.flatten) func += `${resultProp}['${name}'] = ${prop}\n`
     }
   }
   
@@ -133,7 +139,7 @@ function genFunction ({ name, prop, path, groups, reducers}, options, parentObje
   })
 
   groups.forEach(group => {
-    func += genFunction(group, options)
+    func += genFunction(group, options, path)
   })
   
   if (name) {
@@ -144,9 +150,9 @@ function genFunction ({ name, prop, path, groups, reducers}, options, parentObje
   return func 
 }
 
-function parse (reducers, agg, options, ast, path) {
+function parse (state, agg, options, ast) {
   ast = ast || { groups: [], reducers: [] }
-  path = path || []
+  const reducers = state.reducers
 
   const parsed = balanced('(', ')', agg)
   if (!parsed) {
@@ -165,8 +171,8 @@ function parse (reducers, agg, options, ast, path) {
   if (pre === '_flatten') {
     ast.options = { flatten: true }
     options = Object.assign({}, { flatten: true })
-    if (parsed.body) parse(reducers, parsed.body, options, ast, path)
-    if (parsed.post) parse(reducers, parsed.post, options, ast, path)
+    if (parsed.body) parse(state, parsed.body, options, ast)
+    if (parsed.post) parse(state, parsed.post, options, ast)
   } else if (reducers[pre]) {
     if (!as) as = pre + '(' + parsed.body + ')'
     ast.reducers.push({
@@ -176,14 +182,13 @@ function parse (reducers, agg, options, ast, path) {
       body: parsed.body
     })
     
-    if (parsed.post) parse(reducers, parsed.post, options, ast, path) 
+    if (parsed.post) parse(state, parsed.post, options, ast) 
   } else {
-    const prop = pre.replace('.', '_')
-    const newPath = path.concat(options.showGroups || options.flatten ? [`'${prop}'`, prop] : prop)
-    const group = { name: pre, prop, path: newPath, groups: [], reducers: [] }
+    state.currentGroupId = (state.currentGroupId || 0) + 1
+    const group = { name: pre, id: state.currentGroupId, groups: [], reducers: [] }
     ast.groups.push(group)
-    if (parsed.body) parse(reducers, parsed.body, options, group, newPath)
-    if (parsed.post) parse(reducers, parsed.post, options, ast, path)
+    if (parsed.body) parse(state, parsed.body, options, group)
+    if (parsed.post) parse(state, parsed.post, options, ast)
   }
 
   return ast
