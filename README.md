@@ -146,6 +146,10 @@ Sets the flatten value so you get flat results
 **_stdev(property)**
 *{ value: 0, variance: 0, average: 0, count: 0 }*
 
+#### Static String
+**_static(string)**
+*String*
+
 ### Naming reducers
 
 If only supplied with `_sum(km)` the result would be `{ '_sum(km)': 100 }`

@@ -54,6 +54,11 @@ function _stdev (d, curr) {
 }
 _stdev.initialValue = { value: 0, variance: 0, average: 0, count: 0 }
 
+function _static (prev, curr, prop) {
+  return prop
+}
+_static.initialValue = ''
+
 module.exports = {
   '_sum': _sum,
   '_count': _count,
@@ -63,5 +68,6 @@ module.exports = {
   '_last': _last,
   '_has': _has,
   '_avg': _avg,
-  '_stdev': _stdev
+  '_stdev': _stdev,
+  '_static': _static
 }

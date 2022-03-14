@@ -103,7 +103,7 @@ test('#aggsy flatten', function (t) {
 })
 
 test('#reducers', function (t) {
-  t.plan(11)
+  t.plan(12)
   t.same(aggsy('_sum(km)', cars), { '_sum(km)': 920 }, '_sum')
   t.same(aggsy('_count()', cars), { '_count()': 8 }, '_count')
   t.same(aggsy('_min(km)', cars), { '_min(km)': 10 }, '_min')
@@ -113,6 +113,7 @@ test('#reducers', function (t) {
   t.same(aggsy('_has(model), _has(test)', cars), { '_has(model)': true, '_has(test)': false }, '_has')
   t.same(aggsy('_avg(km)', cars), { '_avg(km)': { count: 8, value: 115.00000000000001 } }, '_avg')
   t.same(aggsy('_stdev(km)', cars), { '_stdev(km)': { average: 115.00000000000001, count: 8, value: 67.84457955963455, variance: 4602.886975623584 } }, '_stdev')
+  t.same(aggsy('_static(test test)', cars), { '_static(test test)': 'test test' }, '_static')
 
   t.same(aggsy('foo: _sum(foo)', emptyValue), { 'foo': 1 })
 

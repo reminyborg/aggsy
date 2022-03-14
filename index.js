@@ -130,12 +130,12 @@ function genFunction ({ name, id, groups, reducers}, options, parentPath) {
     func += '\n/** REDUCER: ' + reducer.as + ' */\n'
     func += `if (typeof ${reducerProp}  === 'undefined') `
     if (typeof reducer.initialValue !== 'undefined') {
-      func += `${reducerProp} = ${reducer.name}(${JSON.stringify(reducer.initialValue)}${itemProp ? `, ${itemProp}` : ''})\n`
+      func += `${reducerProp} = ${reducer.name}(${JSON.stringify(reducer.initialValue)}${itemProp ? `, ${itemProp}` : ''}, '${reducer.body}')\n`
     } else if (itemProp) {
       func += `${reducerProp} = ${itemProp}\n`
     }
 
-    func += `else ${reducerProp} = ${reducer.name}(${reducerProp}${itemProp ? `, ${itemProp}` : ''})\n`
+    func += `else ${reducerProp} = ${reducer.name}(${reducerProp}${itemProp ? `, ${itemProp}` : ''}, '${reducer.body}')\n`
   })
 
   groups.forEach(group => {
