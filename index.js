@@ -88,11 +88,13 @@ function createPath (prefix, path, options) {
 }
 
 function genFunction ({ name, id, groups, reducers}, options, parentPath) {
-  path = parentPath || []
+  var path
   const leaf = options.flatten && !groups.length
   if (id) {
     var prop = 'group' + id
-    path = path.concat(options.showGroups || options.flatten ? [`'${name}'`, prop] : prop)
+    path = parentPath.concat(options.showGroups || options.flatten ? [`'${name}'`, prop] : prop)
+  } else {
+    path = parentPath || []
   }
   let func = ''
   const resultObject = !options.flatten || leaf ? 'result' : '_tmp'

@@ -29,6 +29,13 @@ var people = [
   { name: 'Bob' }  // car property missing
 ]
 
+var subArray = [ 
+  { id: 3, type: 'one' },
+  { id: 1, type: 'one', sub: [{ c: 1, b: 2}, { c: 2, b: 3 }] },
+  { id: 2, type: 'two', sub: [{ c: 4, b: 2}, { c: 3, b: 3 }] },
+  { id: 4, type: 'two', sub: [{ c: 3, b: 3 }] }
+]
+
 var emptyValue = [
   { foo: 1 },
   { }
@@ -70,17 +77,25 @@ var simpleFlattened = [ { model: 'volvo', distance: 420, count: 3 }, { model: 't
 
 
 test('#aggsy', function (t) {
-  t.plan(4)
+  t.plan(6)
   t.same(aggsy('model()', carsDot), simpleGrouping, 'simple grouping')
   t.same(aggsy('model(_sum(km)_count())', cars), simpleAggs, 'simple aggs')
   t.same(aggsy('model( _sum(km),_count())', cars), simpleAggs, 'commas and spaces')
+  t.same(aggsy('model(s:_sum(detail.seats))', carsDot), { volvo: { s: 17 }, tesla: { s: 23 }, vw: { s: 7 } }, 'dot notation in props')
   t.same(aggsy('model(distance:_sum(km), reports: _count())', cars), namedReducers, 'named reducers')
+  t.same(aggsy('model(d:_sum(km)), model(d:_sum(km))', cars), { volvo: { d: 840 }, tesla: { d: 800 }, vw: { d: 200 } }, 'named reducers')
 })
 
 test('#aggsy nested', function (t) {
   t.plan(1)
   t.same(aggsy('model(make(count: _count()), count: _count()), count: _count()', cars), nestedAggs, 'nested aggs')
 })
+
+/* test('#aggsy array values', function (t) {
+  t.plan(1)
+  t.same(aggsy('type(c: _sum(sub.c))', subArray), { one: { c: 3 }, two: { c: 10 } }, 'Array values')
+  // t.same(aggsy('type(sub.c(_sum(sub.c))', subArray), undefined, 'Array values')
+}) */
 
 test('#aggsy missing', function (t) {
   t.plan(2)
