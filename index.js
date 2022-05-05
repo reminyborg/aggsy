@@ -71,7 +71,7 @@ return function (result, item) {
 
 function propPath (name, path) {
   var parts = path.split('.')
-  return Array(parts.length).join('(') + name + '["' + parts.join('"] || false)["') + '"]'
+  return Array(parts.length).join('(') + name + '["' + parts.join('"] || false)["') + '"]'
 }
 // create lookup path into the result structure
 function createPath (prefix, path, options) {
